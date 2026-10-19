@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hard stuff</title>
+<script>
+/* Use the saved choice if there is one, otherwise follow the device setting */
+(function(){var t=null;try{t=localStorage.getItem("theme")}catch(e){}
+if(t!=="light"&&t!=="dark")t=matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";
+document.documentElement.setAttribute("data-theme",t)})();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#6a1228;--panel:#86193a;--panel2:#9c2147;--line:#c0526e;--track:#45091a;--text:#fff1e8;--muted:#f6c9b8;
+  --accent:#ffcfb0;--ok:#ffcfb0;--wip:#ffd166;
+  --display:"Silkscreen","Courier New",monospace;--body:"IBM Plex Sans",system-ui,sans-serif}
+:root[data-theme="light"]{--bg:#ffe8d9;--panel:#fff6ee;--panel2:#ffe3d0;--line:#e5b199;--track:#f3d2bf;--text:#4a0f20;--muted:#8a4552;
+  --accent:#8a1c3a;--ok:#8a1c3a;--wip:#8a5a00}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.theme{flex:none;font:700 13px var(--display);color:var(--accent);background:transparent;border:2px solid var(--accent);
+  border-radius:999px;padding:6px 14px;cursor:pointer}
+.theme:hover{background:var(--accent);color:var(--bg)}
+.theme:focus-visible{outline:3px solid var(--text);outline-offset:2px}
+*{box-sizing:border-box}
+html{height:100%}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font:16px/1.5 var(--body);padding:24px 16px 48px}
+main{max-width:1100px;margin:0 auto}
+h1{font:700 clamp(30px,6vw,48px)/1 var(--display);margin:0 0 8px;color:var(--accent)}
+.sub{color:var(--muted);margin:0 0 28px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:20px;align-items:stretch}
+.card{display:flex;flex-direction:column;gap:14px;background:linear-gradient(165deg,var(--panel),var(--panel2));border:2px solid var(--line);border-radius:16px;padding:18px}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.head h2{font:700 24px/1.1 var(--display);margin:0;color:var(--accent)}
+.by{color:var(--muted);font-size:14px;margin:2px 0 0}
+.badge{flex:none;font:700 12px var(--display);padding:4px 8px;border-radius:999px;border:2px solid currentColor}
+.badge.ok{color:var(--ok)}.badge.wip{color:var(--wip)}
+.thumb{aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:var(--track);display:grid;place-items:center;
+  color:var(--muted);font-size:14px;text-align:center;padding:10px}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb svg{display:block;margin:0 auto 6px}
+dl{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 12px;margin:0}
+dl div{min-width:0}dt{color:var(--muted);font-size:13px}dd{margin:0;font-weight:500}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tags span{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:1px 9px;color:var(--muted)}
+.card p{margin:0}
+.lbl{font:700 12px var(--display);color:var(--accent);margin:0 0 4px}
+.note{color:var(--muted);font-size:15px}
+.spacer{flex:1}
+.bar{position:relative;height:34px;border:3px solid #000;border-radius:17px;background:var(--track);overflow:hidden;box-shadow:0 0 0 2px var(--line)}
+.col{position:absolute;top:0;bottom:0;display:flex;flex-direction:column}
+.col button{flex:1;border:0;padding:0;cursor:pointer;transition:opacity .15s}
+.col button:focus-visible{outline:3px solid var(--text);outline-offset:-3px;position:relative;z-index:2}
+.bar.hl button:not(.on){opacity:.22}
+.runs{margin:8px 0 0;padding:0;list-style:none;font-size:14px}
+.runs li{display:flex;gap:8px;align-items:center;padding:3px 0;cursor:pointer}
+.runs li.on{font-weight:500}
+.runs .sw{flex:none;width:10px;height:10px;border-radius:50%}
+.runs a{color:var(--text);margin-left:auto}.runs em{margin-left:auto;font-style:normal;color:var(--muted);font-size:12px}
+.none{color:var(--muted);font-size:14px;margin:8px 0 0}
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <div>
+      <h1>Hard stuff</h1>
+      <p class="sub">Recent hard levels and how my runs went. Click a bar slice to open its video.</p>
+    </div>
+    <button class="theme" id="theme" type="button"></button>
+  </div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<script>
+/* ADD LEVELS / RUNS HERE.
+   beaten: true unlocks the thumbnail. thumb: image URL (your own screenshot works too).
+   runs: { start, end, url, note }  url = unlisted video or "" ; tip: add ?t=123 to jump in a YouTube clip.
+   Stats are a snapshot copied from AREDL pages; update "checked" when you refresh them. */
+const LEVELS = [
+  { name: "Subsonic", by: "Rustam, Terron, xcy7 and others", diff: "Extreme Demon", length: "XL",
+    rank: "#641", points: "55", gddl: "26", tags: ["Nerve Control", "Overall"], beaten: false,
+    thumb: "https://raw.githubusercontent.com/All-Rated-Extreme-Demon-List/Thumbnails/main/levels/full/33387622.webp",
+    checked: "Oct 2026",
+    desc: "4th entry of the Sonic series and the hardest one. Balanced, consistent gameplay, with a dual by Jeyzor at the ending.",
+    notes: "Back half is solid. 5-12% fails about 1 in 4. Early clicks under pressure are the habit to fix.",
+    runs: [
+      { start: 0,  end: 61,  url: "", note: "Best from zero. Clicked too late in the ship section" },
+      { start: 13, end: 88,  url: "", note: "Best from 13%. Didn't hold on the first orb of the dual" },
+      { start: 24, end: 74,  url: "", note: "Best from 24%" },
+      { start: 71, end: 100, url: "", note: "Ending from panman" },
+      { start: 53, end: 100, url: "", note: "Back half cleared (start pos)" } ] },
+];
+const COLORS = ["#ffd23f","#ff8a3d","#ff5c8a","#b06cff","#4d8bff","#34e0ff","#5ee38a","#e8e8f0"];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const lab = r => `${r.start}\u2013${r.end}%`;
+const stat = (k, v) => `<div><dt>${k}</dt><dd>${v ? esc(v) : "\u2014"}</dd></div>`;
+
+const lock = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>`;
+
+function bar(runs) {
+  runs.forEach((r,i) => r.color = COLORS[i % COLORS.length]);
+  const pts = [...new Set([0,100,...runs.flatMap(r=>[r.start,r.end])])].sort((a,b)=>a-b);
+  let h = "";
+  for (let k = 0; k < pts.length-1; k++) {
+    const a = pts[k], b = pts[k+1];
+    const cover = runs.map((r,i)=>({r,i})).filter(({r}) => r.start <= a && r.end >= b);
+    if (!cover.length) continue;
+    h += `<div class="col" style="left:${a}%;width:${b-a}%">` + cover.map(({r,i}) =>
+      `<button data-i="${i}" style="background:${r.color}" title="${lab(r)}" aria-label="Run ${lab(r)}"></button>`).join("") + `</div>`;
+  }
+  return `<div class="bar">${h}</div><ul class="runs">` + runs.map((r,i) =>
+    `<li data-i="${i}"><i class="sw" style="background:${r.color}"></i>${lab(r)} ${esc(r.note||"")}` +
+    (r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener">Watch</a>` : `<em>no video</em>`) + `</li>`).join("") + `</ul>`;
+}
+
+const themeBtn = document.getElementById("theme");
+function showTheme() {
+  const light = document.documentElement.getAttribute("data-theme") === "light";
+  themeBtn.textContent = light ? "Dark mode" : "Light mode";
+  themeBtn.setAttribute("aria-label", light ? "Switch to dark mode" : "Switch to light mode");
+}
+themeBtn.addEventListener("click", () => {
+  const next = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", next);
+  try { localStorage.setItem("theme", next); } catch (e) {}
+  showTheme();
+});
+showTheme();
+
+const grid = document.getElementById("grid");
+LEVELS.forEach((L, n) => {
+  const thumb = L.beaten
+    ? (L.thumb ? `<img src="${esc(L.thumb)}" alt="${esc(L.name)} thumbnail" onerror="this.parentNode.textContent='Thumbnail failed to load'">` : "No thumbnail yet")
+    : `<div>${lock}Unlocks when beaten</div>`;
+  const el = document.createElement("article");
+  el.className = "card";
+  el.innerHTML = `
+    <div class="head"><div><h2>${esc(L.name)}</h2><p class="by">${esc(L.by)}</p></div>
+      <span class="badge ${L.beaten ? "ok" : "wip"}">${L.beaten ? "Beaten" : "In progress"}</span></div>
+    <div class="thumb">${thumb}</div>
+    <dl>${stat("Difficulty", L.diff)}${stat("Length", L.length)}${stat("AREDL rank", L.rank)}${stat("List points", L.points)}${stat("GDDL tier", L.gddl)}${stat("Checked", L.checked)}</dl>
+    ${L.tags.length ? `<div class="tags">${L.tags.map(t=>`<span>${esc(t)}</span>`).join("")}</div>` : ""}
+    ${L.desc ? `<div><p class="lbl">About</p><p>${esc(L.desc)}</p></div>` : ""}
+    ${L.notes ? `<div><p class="lbl">My notes</p><p class="note">${esc(L.notes)}</p></div>` : ""}
+    <div class="spacer"></div>
+    <div><p class="lbl">Runs</p>${L.runs.length ? bar(L.runs) : `<p class="none">No runs logged yet.</p>`}</div>`;
+  const barEl = el.querySelector(".bar");
+  const hl = i => {
+    if (!barEl) return;
+    barEl.classList.toggle("hl", i !== null);
+    el.querySelectorAll(".bar button").forEach(b => b.classList.toggle("on", +b.dataset.i === i));
+    el.querySelectorAll(".runs li").forEach(l => l.classList.toggle("on", +l.dataset.i === i));
+  };
+  el.addEventListener("pointerover", e => { const t = e.target.closest("[data-i]"); hl(t ? +t.dataset.i : null); });
+  el.addEventListener("pointerleave", () => hl(null));
+  el.addEventListener("focusin", e => { const t = e.target.closest("[data-i]"); if (t) hl(+t.dataset.i); });
+  el.addEventListener("click", e => {
+    if (e.target.closest("a")) return;
+    const t = e.target.closest("[data-i]");
+    if (t && L.runs[+t.dataset.i].url) window.open(L.runs[+t.dataset.i].url, "_blank", "noopener");
+  });
+  grid.appendChild(el);
+});
+</script>
+</body>
+</html>
